@@ -140,10 +140,17 @@ function postBrag() {
   })
 }
 
+let admins = [3457540];//,100788303];
+
 function handleUpdate(update) {
-  brag(function (text) {
-    replyToMessage(update.message, text);
-  })
+
+  if (update.message.text == "/post" && admins.includes(update.message.chat.id) ) {
+    postBrag();
+  } else {
+    brag(function (text) {
+      replyToMessage(update.message, text);
+    })
+  }
 
   console.log(update.message)
 }
