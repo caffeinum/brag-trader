@@ -65,17 +65,28 @@ function getUpdates() {
     }
   })
 }
+function round(x,base) {
+  return Math.floor(x * base) / base
+}
 
 function handleUpdate(update) {
   let exmo_url = "https://api.exmo.com/v1/ticker/";
   
   request(exmo_url, function (data){
-    let price = data["BTC_USD"];
+    let price = data["BTC_RUB"];
     let low = price["low"];
     let high = price["high"];
     let amount = 12000; // rub
     console.log(low, high);
-    replyToMessage(update.message, "Я вложил "+amount+" руб. и, торгуя биткоином на EXMO, за последние сутки заработал с них +" + Math.floor((high/low-1)*amount * 100) / 100+" руб.");
+    let intro = ["Торговал сегодня битком. "];
+    let message = intro[0] + "Купил на "+amount+" руб. по цене "+ round(low,0.01) +
+        " на "+ amount +" руб., продал по цене "+ round(high,0.01) +
+        ", заработал +"+round((high/low-1),100)*100+"%, +"+
+        round((high/low-1)*amount,100)+" руб.";
+
+    // message = "Я купил "+amount+" руб. и, торгуя биткоином на EXMO, за последние сутки заработал с них +" + Math.floor((high/low-1)*amount * 100) / 100+" руб.";
+
+    replyToMessage(update.message, message);
   });
 
   console.log(update.message)
