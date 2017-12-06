@@ -5,7 +5,7 @@ var https = require("https");
 var fs = require("fs");
 var querystring = require('querystring');
 
-
+var balance = 4400;
 // init project
 var express = require('express');
 var app = express();
@@ -16,7 +16,21 @@ var telegram_api = "https://api.telegram.org/"//402243532:AAHds37dMd2Q_TTN4xsO1W
 var api_url = telegram_api + "bot" + token
 
 // https://super-cook.glitch.me/402243532:AAHds37dMd2Q_TTN4xsO1WdHmc25lU8pXOw
+let intros = [
+  "Торговал битком:",
+  "Прикинь, впервые вообще на биржу зашёл.",
+  "Использовал quantative analysis.",
+  "Продал эфиры. Биткоины - будущее!",
+  "Эта коза меня бросила, а теперь опять пишет. Конечно, я теперь талант:",
+  "Случайно нажал купить и заработал.",
+  "Кошка наступила на клавиатуру и получила миллионы прибыли.",
+  "Погадал по картам таро и вложился на всю сумму.",
+  "Перевёл всю стипендию, оказалось, не зря!",
+  "Хотел сегодня не торговать, но не удержался...",
+  "Сегодня продал почку, оказалось, не зря.",
+];
 
+var CHANNEL_CHAT_ID = -1001176527277;
 
 var updates = [];
 var update_last_id = 0;
@@ -69,44 +83,69 @@ function round(x,base) {
   return Math.floor(x * base) / base
 }
 
-function handleUpdate(update) {
+function brag(callback) {
   let exmo_url = "https://api.exmo.com/v1/ticker/";
-  
+
   request(exmo_url, function (data){
-    let price = data["BTC_RUB"];
+    let price = data["BTC_USD"];
     let low = price["low"];
     let high = price["high"];
-    let amount = 44000; // rub
     console.log(low, high);
-    let intros = [
-      "Торговал сегодня битком.",
-      "Прикинь, впервые вообще на биржу зашёл.",
-      "Использовал quantative analysis.",
-      "Продал эфиры. Биткоины - будущее!",
-      "Эта коза меня бросила, а теперь опять пишет. Конечно, теперь я талант:",
-      "Случайно нажал купить и заработал.",
-      "Кошка наступила на клавиатуру и получила миллионы прибыли.",
-      "Погадал по картам таро и вложился на всю сумму.",
-    ];
-    
-    
+
+    let amount = balance; // 4400 rub
+
+
     let rindex = Math.floor(Math.random()*intros.length);
-    
-    let message = intros[rindex] + "\n\n" + "Сегодня купил BTC по "+ round(low/1000,1)  + "к" +
-        ", продал по "+ round(high/1000,1) + "к" +
-        " \n\nЗаработал +"+round((high/low-1),100)*100+"%, "+
-        round((high/low)*amount,1)+"руб. с "+amount/1000+"к";
+
+    let message = intros[rindex] + "\n\n" +
+    "Купил биткоины по $"  + formatPrice(low) +
+    " и продал по $"       + formatPrice(high) +
+
+    " \n\nВложил "+amount+" рублей, "+
+    " заработал "+round((high/low-1)*amount,100)+" руб. за день "+
+    "(+" + round((high/low-1),100)*100+"%)";
+
+    // Купил биткоины на стипендию по $12,000 и продал по $13'000
+    // Вложил 6600 рублей, заработал 650 руб. за день (+15%)
 
     // message = "Я купил "+amount+" руб. и, торгуя биткоином на EXMO, за последние сутки заработал с них +" + Math.floor((high/low-1)*amount * 100) / 100+" руб.";
     console.log(message)
 
-    replyToMessage(update.message, message);
+    callback(message);
   });
 
-  console.log(update.message)
+}
 
-  return;
+function updateBalance() {
+  // read from file
+
+
+  balance = balance;
+
   
+
+
+}
+
+function formatPrice(price) {
+  // in usd
+  let th = Math.floor(price/1000)
+  let res = Math.round(price - th*1000)
+  return th + " " + res
+}
+
+function postBrag() {
+  brag(function(text){
+    replyToMessage( {chat: { id: CHANNEL_CHAT_ID }}, text, false)
+  })
+}
+
+function handleUpdate(update) {
+  brag(function (text) {
+    replyToMessage(update.message, text);
+  })
+
+  console.log(update.message)
 }
 
 function download(url, dest, cb) {
@@ -162,6 +201,8 @@ function request(url, callback) {
 
 function startCycle() {
   setInterval(getUpdates, 500)
+  setInterval(postBrag, 12*60*60*1000)
+  // twice a day
 }
 
 // http://expressjs.com/en/starter/static-files.html
