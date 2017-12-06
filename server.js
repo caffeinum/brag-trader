@@ -76,15 +76,29 @@ function handleUpdate(update) {
     let price = data["BTC_RUB"];
     let low = price["low"];
     let high = price["high"];
-    let amount = 12000; // rub
+    let amount = 44000; // rub
     console.log(low, high);
-    let intro = ["Торговал сегодня битком. "];
-    let message = intro[0] + "Купил на "+amount+" руб. по цене "+ round(low,0.01) +
-        " на "+ amount +" руб., продал по цене "+ round(high,0.01) +
-        ", заработал +"+round((high/low-1),100)*100+"%, +"+
-        round((high/low-1)*amount,100)+" руб.";
+    let intros = [
+      "Торговал сегодня битком.",
+      "Прикинь, впервые вообще на биржу зашёл.",
+      "Использовал quantative analysis.",
+      "Продал эфиры. Биткоины - будущее!",
+      "Эта коза меня бросила, а теперь опять пишет. Конечно, теперь я талант:",
+      "Случайно нажал купить и заработал.",
+      "Кошка наступила на клавиатуру и получила миллионы прибыли.",
+      "Погадал по картам таро и вложился на всю сумму.",
+    ];
+    
+    
+    let rindex = Math.floor(Math.random()*intros.length);
+    
+    let message = intros[rindex] + "\n\n" + "Сегодня купил BTC по "+ round(low/1000,1)  + "к" +
+        ", продал по "+ round(high/1000,1) + "к" +
+        " \n\nЗаработал +"+round((high/low-1),100)*100+"%, "+
+        round((high/low)*amount,1)+"руб. с "+amount/1000+"к";
 
     // message = "Я купил "+amount+" руб. и, торгуя биткоином на EXMO, за последние сутки заработал с них +" + Math.floor((high/low-1)*amount * 100) / 100+" руб.";
+    console.log(message)
 
     replyToMessage(update.message, message);
   });
