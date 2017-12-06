@@ -39,15 +39,15 @@ function censor(censor) {
   var i = 0;
 
   return function(key, value) {
-    if(i !== 0 && typeof(censor) === 'object' && typeof(value) == 'object' && censor == value) 
-      return '[Circular]'; 
+    if(i !== 0 && typeof(censor) === 'object' && typeof(value) == 'object' && censor == value)
+      return '[Circular]';
 
     if(i >= 29) // seems to be a harded maximum of 30 serialized objects?
       return '[Unknown]';
 
     ++i; // so we know we aren't using the original object anymore
 
-    return value;  
+    return value;
   }
 }
 
@@ -59,18 +59,18 @@ function replyToMessage(message, myMessage, replyMarkup) {
   ((!replyMarkup) ? "" : ("&reply_to_message_id=" + message.message_id) ) +
                           "&text=" + encodeURIComponent(text)
 
-  console.log("get", api_url + method + data) 
+  console.log("get", api_url + method + data)
   https.get( api_url + method + data )
-  
+
 }
 
 function getUpdates() {
   var method = "/getUpdates"
   var data = "?offset=" + (update_last_id+1)
-  
+
   request(api_url + method + data, function(res) {
     if (!res.ok) return;
-    
+
     for (var key in res.result) {
       var update = res.result[key]
       updates.push( update )
@@ -103,7 +103,7 @@ function brag(callback) {
 
     " \n\nВложил "+amount+" рублей, "+
     " заработал "+round((high/low-1)*amount,100)+" руб. за день "+
-    "(+" + round((high/low-1),100)*100+"%)";
+    "(+" + Math.round((high/low-1)*100)+"%)";
 
     // Купил биткоины на стипендию по $12,000 и продал по $13'000
     // Вложил 6600 рублей, заработал 650 руб. за день (+15%)
@@ -122,7 +122,7 @@ function updateBalance() {
 
   balance = balance;
 
-  
+
 
 
 }
@@ -162,7 +162,7 @@ function download(url, dest, cb) {
 }
 
 function request(url, callback) {
-  
+
   https.get(url, function (res) {
       const { statusCode } = res;
       const contentType = res.headers['content-type'];
@@ -175,7 +175,7 @@ function request(url, callback) {
         error = new Error('Invalid content-type.\n' +
                           `Expected application/json but received ${contentType}`);
       }
-    
+
       if (error) {
         console.error(error.message);
         //console.error(res);
@@ -183,7 +183,7 @@ function request(url, callback) {
         res.resume();
         return;
       }
-    
+
       res.setEncoding('utf8');
       let rawData = '';
       res.on('data', (chunk) => { rawData += chunk; });
@@ -214,18 +214,18 @@ app.get("/", function (request, response) {
 });
 
 app.get("/" + token, function(req, res) {
-  
+
   var message = JSON.stringify(req.query, censor(req.query), 4)
-  
+
   console.log(message)
   console.log(req.query)
-  
+
   var url = replyToMessage(message)
-  
+
   https.get(url, function(response) {
     res.send("{}");
   })
-  
+
 })
 
 // listen for requests :)
